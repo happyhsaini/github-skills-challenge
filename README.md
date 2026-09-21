@@ -33,6 +33,27 @@ move those findings through an event-driven workflow. The main components are:
 	final event consumption.
 - `tests/`: verifies calculations and the AIOps event workflow.
 
+## Operational Data Analysis
+
+The synthetic data contains 10 observations for `payment-service`, recorded one
+minute apart from `2026-09-20T10:00:00` through `2026-09-20T10:09:00`. The
+timestamp identifies when each telemetry observation occurred and allows the
+records to be viewed as a short time series.
+
+- **Metrics:** `response_time_ms` measures request latency, while `cpu_percent`
+	and `memory_percent` measure resource utilization.
+- **Logs:** `log_level` and `message` describe the service log event. `service`
+	identifies the emitting service and is useful context for both metrics and
+	logs.
+- **Normal behaviour:** The records at 10:00-10:04 and 10:07-10:09 have
+	`INFO` logs saying the payment request was processed successfully. Response
+	times are 120-150 ms, CPU is 42-50%, and memory is 51-57%.
+- **Unusual behaviour:** At 10:05, response time rises to 610 ms and the log
+	reports a payment service timeout at `ERROR` level. At 10:06, response time
+	rises to 640 ms, CPU reaches 94%, memory reaches 91%, and the log reports a
+	database connection timeout at `ERROR` level. These two adjacent records are
+	the incident window; the later records return to the normal range.
+
 Good luck!
 
 
