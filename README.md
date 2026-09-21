@@ -57,6 +57,31 @@ records to be viewed as a short time series.
 Good luck!
 
 
+## Anomaly Detection Results
+
+Using the provided `AnomalyDetector` with its default thresholds (response time
+over 500 ms, CPU over 80%, or memory over 80%), the pipeline processed all 10
+records and produced 2 anomaly events:
+
+- `2026-09-20T10:05:00`: flagged for **high response time** (`610 ms`). The
+	related log is `ERROR: Payment service timeout`; CPU was 75% and memory was
+	70%.
+- `2026-09-20T10:06:00`: flagged for **high response time** (`640 ms`), **high
+	CPU utilization** (`94%`), and **high memory utilization** (`91%`). The
+	related log is `ERROR: Database connection timeout`.
+
+The detector correctly distinguished the eight normal observations from the two
+metric anomalies, and no normal observation was incorrectly flagged. However,
+both concerning log events were missed as explicit log-based reasons because the
+detector checks for `WARNING` instead of the `ERROR` level present in the data.
+This is the main detection limitation; the log-level rule should recognize the
+levels that represent errors in the service data.
+
+The detection stage produced two events, but the current workflow reports zero
+consumed events because the producer publishes to `service-events` while the
+consumer reads from a separate `anomaly-events` topic. The event topics should be
+connected when validating end-to-end delivery.
+
 ---
 
 &copy; 2025 GitHub &bull; [Code of Conduct](https://www.contributor-covenant.org/version/2/1/code_of_conduct/code_of_conduct.md) &bull; [MIT License](https://gh.io/mit)
