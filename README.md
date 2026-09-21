@@ -70,16 +70,14 @@ records and produced 2 anomaly events:
 	CPU utilization** (`94%`), and **high memory utilization** (`91%`). The
 	related log is `ERROR: Database connection timeout`.
 
-The detector correctly distinguished the eight normal observations from the two
-metric anomalies, and no normal observation was incorrectly flagged. However,
-both concerning log events were missed as explicit log-based reasons because the
-detector checks for `WARNING` instead of the `ERROR` level present in the data.
-This is the main detection limitation; the log-level rule should recognize the
-levels that represent errors in the service data.
+The detector correctly distinguishes the eight normal observations from the two
+anomalous observations, and no normal observation is incorrectly flagged. The
+log-level rule was corrected to recognize the `ERROR` level present in the data,
+so both concerning log events are now reported with the explicit reason
+`Error log detected`.
 
-The detection stage produces two events. The event-flow wiring is described below;
-the detector's log-level limitation does not prevent these metric-based events
-from being created.
+The detection stage produces two events, including the relevant metric and log
+reasons. The event-flow wiring is described below.
 
 ## Event Streaming Workflow
 
