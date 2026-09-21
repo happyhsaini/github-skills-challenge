@@ -83,8 +83,12 @@ reasons. The event-flow wiring is described below.
 
 The event flow uses the provided components as follows:
 
+- **Event/message:** an anomaly dictionary containing the timestamp, service,
 	anomaly type, reasons, and original source record.
+- **Producer:** `EventProducer` accepts each detected anomaly and publishes it.
+- **Topic:** `EventTopic("anomaly-events")` stores the published messages in
 	memory.
+- **Consumer:** `EventConsumer` reads messages from that same topic for the
 	downstream AIOps processing step.
 
 After connecting the producer and consumer to the same topic, the workflow
@@ -104,6 +108,39 @@ observations, generated 2 `ANOMALY` events, published both events to the shared
 the `payment-service` issues at `10:05` and `10:06`, including high response time,
 the `ERROR` log signal, and the high CPU and memory utilization at `10:06`.
 This confirms that the final output represents the detected operational issue.
+
+## Issues Identified and Corrected
+
+- The producer and consumer were connected to separate topic instances, so
+	detected events could not reach the consumer. Both now use the shared
+	`anomaly-events` topic.
+- The detector checked for `WARNING` even though the operational data uses
+	`ERROR` for concerning logs. The detector now recognizes `ERROR` and records
+	`Error log detected` as a reason.
+
+## Limitations and Possible Improvements
+
+The detector uses fixed thresholds and a small set of rules, so it may miss
+gradual degradation or service-specific patterns. A production implementation
+could learn a baseline from historical telemetry and use a durable event broker
+with richer log classification and alert correlation.
+
+## Reproduce the Demonstration
+
+From the repository root, run:
+
+```bash
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python -m pytest -q
+python src/aiops_pipeline.py
+```
+
+The final command should report 10 records processed, 2 anomalies detected, and
+2 events consumed, followed by the two `payment-service` anomaly details. On
+Windows PowerShell, activate the environment with
+`venv\\Scripts\\Activate.ps1` instead of `source venv/bin/activate`.
 
 ---
 
