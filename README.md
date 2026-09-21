@@ -83,18 +83,27 @@ reasons. The event-flow wiring is described below.
 
 The event flow uses the provided components as follows:
 
-- **Event/message:** an anomaly dictionary containing the timestamp, service,
 	anomaly type, reasons, and original source record.
-- **Producer:** `EventProducer` accepts each detected anomaly and publishes it.
-- **Topic:** `EventTopic("anomaly-events")` stores the published messages in
 	memory.
-- **Consumer:** `EventConsumer` reads messages from that same topic for the
 	downstream AIOps processing step.
 
 After connecting the producer and consumer to the same topic, the workflow
 processed 10 records, detected 2 anomalies, published 2 events, and consumed 2
 events. Both downstream events were printed with their service, timestamp, type,
 and detection reasons, confirming complete event delivery.
+
+## End-to-End Pipeline Execution
+
+The corrected workflow was executed successfully through every stage:
+
+`Operational Data -> Anomaly Detection -> Event -> Producer -> Topic -> Consumer -> AIOps`
+
+The final run processed 10 operational records, detected 2 anomalous
+observations, generated 2 `ANOMALY` events, published both events to the shared
+`anomaly-events` topic, and consumed both events. The downstream output identified
+the `payment-service` issues at `10:05` and `10:06`, including high response time,
+the `ERROR` log signal, and the high CPU and memory utilization at `10:06`.
+This confirms that the final output represents the detected operational issue.
 
 ---
 
