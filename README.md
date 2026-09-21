@@ -77,10 +77,26 @@ detector checks for `WARNING` instead of the `ERROR` level present in the data.
 This is the main detection limitation; the log-level rule should recognize the
 levels that represent errors in the service data.
 
-The detection stage produced two events, but the current workflow reports zero
-consumed events because the producer publishes to `service-events` while the
-consumer reads from a separate `anomaly-events` topic. The event topics should be
-connected when validating end-to-end delivery.
+The detection stage produces two events. The event-flow wiring is described below;
+the detector's log-level limitation does not prevent these metric-based events
+from being created.
+
+## Event Streaming Workflow
+
+The event flow uses the provided components as follows:
+
+- **Event/message:** an anomaly dictionary containing the timestamp, service,
+	anomaly type, reasons, and original source record.
+- **Producer:** `EventProducer` accepts each detected anomaly and publishes it.
+- **Topic:** `EventTopic("anomaly-events")` stores the published messages in
+	memory.
+- **Consumer:** `EventConsumer` reads messages from that same topic for the
+	downstream AIOps processing step.
+
+After connecting the producer and consumer to the same topic, the workflow
+processed 10 records, detected 2 anomalies, published 2 events, and consumed 2
+events. Both downstream events were printed with their service, timestamp, type,
+and detection reasons, confirming complete event delivery.
 
 ---
 
